@@ -5,14 +5,12 @@ import json
 import os
 import sys
 from subprocess import getoutput
-from typing import List, Union, Dict
+from typing import Dict, NewType
 
-FunctionDef = Union[ast.FunctionDef, ast.AsyncFunctionDef]
+QualifiedPath = NewType("QualifiedPath", str)
+DocString = NewType("DocString", str)
+
 FunctionTypes = (ast.FunctionDef, ast.AsyncFunctionDef)
-DocStringTypes = Union[FunctionDef, ast.ClassDef]
-QualifiedPath = str
-DocString = str
-
 
 def parse_project(root) -> Dict[QualifiedPath, DocString]:
     """ Extract documentation from all '*.py' files in specified python module
@@ -85,13 +83,13 @@ def get_all_docstrings(filename: str, prefix: str) -> Dict[QualifiedPath, DocStr
     return doc_strings
 
 
-def _open_and_parse_file(filename: str) -> ast.AST:
+def _open_and_parse_file(filename: str) -> ast.Module:
     with open(filename) as file:
         tree = ast.parse(file.read())
     return tree
 
 
-def _filter_nodes(tree: ast.AST, nodetype: DocStringTypes) -> List[DocStringTypes]:
+def _filter_nodes(tree, nodetype):
     nodes = [node for node in tree.body
              if isinstance(node, nodetype)]
     return nodes
